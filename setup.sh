@@ -46,6 +46,13 @@ function install_devise {
   rails generate devise:install
 }
 
+function install_awesome_print {
+  echo "adding awesome print"
+  add_line_to_file Gemfile 2 "# pretty-print JSON objects in command line"
+  add_line_to_file Gemfile 3 "gem 'awesome_print'"
+  
+}
+
 function setup_users_for_test {
   # Edit(replace) users.yml to ensure tests don't fail with user database update errors
   # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
@@ -68,12 +75,15 @@ EOF
 
 rails new $PROJECT
 cd $PROJECT
+
+# JSON object prettifier for command line
+install_awesome_print
+
 # add devise gem to rails for authentication
 install_devise
 
 #set up basic model definition
 define_models
-
 
 # install and run unit test files from original project
 cp ../specs/models/*.rb test/models

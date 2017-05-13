@@ -122,11 +122,6 @@ setup_routes
 # setup controllers
 
 rails generate controller Restaurants
-
-add_line_to_file controllers/restaurants_controller.rb 1 ""
-add_line_to_file controllers/restaurants_controller.rb 2 "  def index"
-add_line_to_file controllers/restaurants_controller.rb 3 "    restaurants = Restaurant.all"
-add_line_to_file controllers/restaurants_controller.rb 4 "    render restaurants"
-add_line_to_file controllers/restaurants_controller.rb 5 "  end"
-add_line_to_file controllers/restaurants_controller.rb 6 ""
+# copy reference controller file
+cp ../controllers/reastaurants_controller.rb app/controllers
 

@@ -71,9 +71,14 @@ cd $PROJECT
 # add devise gem to rails for authentication
 install_devise
 
-# install test users to avoid testing errors due to undefined users with devise
-setup_users_for_test
-
 #set up basic model definition
 define_models
+
+
+# install and run unit test files from original project
+cp ../specs/models/*.rb test/models
+# install test users to avoid testing errors due to undefined users with devise
+setup_users_for_test
+echo "running unit tests..."
+rake test test/models
 

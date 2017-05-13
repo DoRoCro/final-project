@@ -24,6 +24,13 @@ function add_line_to_file {
   mv tmp.tmp $file_name
 }
 
+function delete_line_from_file {
+  file_name=$1
+  line_number_to_delete=$2
+  awk 'NR!='$line_number_to_delete' ' $file_name > tmp.tmp
+  mv tmp.tmp $file_name
+}
+
 function define_models {
   # Define models
   rails generate devise User 
@@ -71,6 +78,23 @@ cat - <<EOF > test/fixtures/users.yml
 EOF
 }
 
+function setup_routes {
+  echo "adding routes ..."
+  add_line_to_file config/routes.rb 2 ""
+  add_line_to_file config/routes.rb 3 '  scope path: \"api\" do'
+  add_line_to_file config/routes.rb 4 "    resources :restaurants, defaults: {format: :json}"
+  add_line_to_file config/routes.rb 5 "  end"
+  add_line_to_file config/routes.rb 6 ""
+  add_line_to_file config/routes.rb 7 "  resources :users"
+  add_line_to_file config/routes.rb 8 ""
+
+  delete_line_from_file config/routes.rb 2
+  add_line_to_file config/routes.rb 1 ""
+  add_line_to_file config/routes.rb 2 "  devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations'}"
+    
+
+}
+
 # construction starts here
 
 rails new $PROJECT
@@ -92,3 +116,5 @@ setup_users_for_test
 echo "running unit tests..."
 rake test test/models
 
+# setup routes
+setup_routes

@@ -49,7 +49,7 @@ class AddressTest < ActiveSupport::TestCase
     assert_equal(true,  @address_no_id1.id == nil)
     @address_no_id1.save()
     assert_equal(true,  @address_no_id1.id != 0)
-    puts "address_no_id1.id =  #{@address_no_id1.id} after save"
+    # puts "address_no_id1.id =  #{@address_no_id1.id} after save"
   end
 
 

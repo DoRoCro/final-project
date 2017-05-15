@@ -109,10 +109,12 @@ function setup_routes {
   add_line_to_file config/routes.rb 2 ""
   add_line_to_file config/routes.rb 3 '  scope path: \"api\" do'
   add_line_to_file config/routes.rb 4 "    resources :restaurants, defaults: {format: :json}"
-  add_line_to_file config/routes.rb 5 "  end"
-  add_line_to_file config/routes.rb 6 ""
-  add_line_to_file config/routes.rb 7 "  resources :users"
+  add_line_to_file config/routes.rb 5 "    resources :burgers, defaults: {format: :json}"
+  add_line_to_file config/routes.rb 6 "    resources :deals, defaults: {format: :json}"
+  add_line_to_file config/routes.rb 7 "  end"
   add_line_to_file config/routes.rb 8 ""
+  # add_line_to_file config/routes.rb 7 "  resources :users"
+  add_line_to_file config/routes.rb 9 ""
 
   delete_line_from_file config/routes.rb 2
   add_line_to_file config/routes.rb 1 ""

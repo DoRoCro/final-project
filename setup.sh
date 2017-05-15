@@ -111,10 +111,11 @@ function setup_routes {
   add_line_to_file config/routes.rb 4 "    resources :restaurants, defaults: {format: :json}"
   add_line_to_file config/routes.rb 5 "    resources :burgers, defaults: {format: :json}"
   add_line_to_file config/routes.rb 6 "    resources :deals, defaults: {format: :json}"
-  add_line_to_file config/routes.rb 7 "  end"
-  add_line_to_file config/routes.rb 8 ""
-  # add_line_to_file config/routes.rb 7 "  resources :users"
+  add_line_to_file config/routes.rb 7 "    resources :addresses, defaults: {format: :json}"
+  add_line_to_file config/routes.rb 8 "  end"
   add_line_to_file config/routes.rb 9 ""
+  # add_line_to_file config/routes.rb 7 "  resources :users"
+  add_line_to_file config/routes.rb 10 ""
 
   delete_line_from_file config/routes.rb 2
   add_line_to_file config/routes.rb 1 ""
@@ -151,6 +152,7 @@ define_models
 
 # install seeds file (amended copy of original seeds, updated some field names)
 cat ../db/seeds_stub.rb >> db/seeds.rb
+rake db:seed
 
 # prepare test environment
 setup_tests
@@ -163,8 +165,25 @@ rake test test/models
 setup_routes
 
 # setup controllers
-rails generate controller Restaurants
+rails generate scaffold_controller Restaurant --no-jbuilder
+add_line_to_file app/controllers/restaurants_controller.rb 7 "    render json: @restaurants"
+add_line_to_file app/controllers/restaurants_controller.rb 13 "    @deal = Deal.find(params[:id])"
+add_line_to_file app/controllers/restaurants_controller.rb 14 "    render json: @deal"
+
+rails generate scaffold_controller Burger --no-jbuilder
+add_line_to_file app/controllers/burgers_controller.rb 7 "    render json: @burgers"
+add_line_to_file app/controllers/burgers_controller.rb 13 "    @burger = Burger.find(params[:id])"
+add_line_to_file app/controllers/burgers_controller.rb 14 "    render json: @burger"
+
+rails generate scaffold_controller Deal --no-jbuilder
+add_line_to_file app/controllers/deals_controller.rb 7 "    render json: @deals"
+add_line_to_file app/controllers/deals_controller.rb 13 "    @deal = Deal.find(params[:id])"
+add_line_to_file app/controllers/deals_controller.rb 14 "    render json: @deal"
+
+rails generate scaffold_controller Address --no-jbuilder
+add_line_to_file app/controllers/addresses_controller.rb 7 "    render json: @address"
+add_line_to_file app/controllers/addresses_controller.rb 7 "    @address = Address.find(params[:id])"
+add_line_to_file app/controllers/addresses_controller.rb 7 "    render json: @address"
 
 # copy reference controller file
-cp ../controllers/restaurants_controller.rb app/controllers
-
+# cp ../controllers/restaurants_controller.rb app/controllers

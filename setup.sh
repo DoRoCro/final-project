@@ -36,12 +36,38 @@ function define_models {
   rails generate devise User 
   rake db:migrate
   rails generate model Address street_addr:string street:string area:string city:string post_code:string phone_no:string
+  rake db:migrate
   rails generate model Restaurant name:string address:references franchise:string
+  rake db:migrate
   rails generate model Burger description:string restaurant:references  price:decimal{5.2} rating:integer
+  rake db:migrate
   rails generate model Deal label:string discount_rate:decimal money_off:decimal start_date:datetime end_date:datetime restaurant:references
   rake db:migrate
+
+  # set up jointable for burgers in a deal
+  rails generate model BurgerDeal burger_id:integer deal_id:integer
+  add_line_to_file app/models/burger_deal.rb 1 "  belongs_to :burger" 
+  add_line_to_file app/models/burger_deal.rb 2 "  belongs_to :deal" 
+
+
+
+  # a deal can have multiple burger_deal entries
+  add_line_to_file app/models/deal.rb 2 "  has_many :burger_deals" 
+
   # a deal can have 1 to many burgers
-  add_line_to_file app/models/deal.rb 2 "  has_many :burgers" 
+  add_line_to_file app/models/deal.rb 3 "  has_many :burgers, through: :burger_deals, source: :burger" 
+
+  # a burger can appear in 0 to many deals
+  add_line_to_file app/models/burger.rb 2 "  has_many :deals, through: :burger_deals, source: :deal" 
+
+  # a restaurant can have 0 to many deals
+  add_line_to_file app/models/restaurant.rb 2 "  has_many :deals" 
+  # a restaurant belongs to one address, so an address can only have one restaurant
+  add_line_to_file app/models/address.rb 1 "  has_one :restaurant" 
+
+
+  # run migrations
+  rake db:migrate
 }
 
 function install_devise {
@@ -91,8 +117,20 @@ function setup_routes {
   delete_line_from_file config/routes.rb 2
   add_line_to_file config/routes.rb 1 ""
   add_line_to_file config/routes.rb 2 "  devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations'}"
-    
+}
 
+function setup_tests {
+  # call after setting up seeds.rb
+  # install and run unit test files from original project
+  cp ../specs/models/*.rb test/models
+
+  # install test users to avoid testing errors due to undefined users with devise
+  setup_users_for_test
+
+  # get test database in line with dev database before running tests
+  rake RAILS_ENV=test db:migrate
+  # seed test database 
+  rake RAILS_ENV=test db:seed 
 }
 
 # construction starts here
@@ -109,10 +147,13 @@ install_devise
 #set up basic model definition
 define_models
 
-# install and run unit test files from original project
-cp ../specs/models/*.rb test/models
-# install test users to avoid testing errors due to undefined users with devise
-setup_users_for_test
+# install seeds file (amended copy of original seeds, updated some field names)
+cat ../db/seeds_stub.rb >> db/seeds.rb
+
+# prepare test environment
+setup_tests
+
+# run unit tests
 echo "running unit tests..."
 rake test test/models
 
@@ -120,8 +161,8 @@ rake test test/models
 setup_routes
 
 # setup controllers
-
 rails generate controller Restaurants
+
 # copy reference controller file
 cp ../controllers/restaurants_controller.rb app/controllers
 

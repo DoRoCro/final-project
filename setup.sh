@@ -38,10 +38,10 @@ function define_models {
   rails generate model Address street_addr:string street:string area:string city:string post_code:string phone_no:string
   rails generate model Restaurant name:string address:references franchise:string
   rails generate model Burger description:string restaurant:references  price:decimal{5.2} rating:integer
-  rails generate model Deal label:string discount_rate:decimal money_off:decimal start_date:datetime end_date:datetime restaurant:references burger:references
+  rails generate model Deal label:string discount_rate:decimal money_off:decimal start_date:datetime end_date:datetime restaurant:references
   rake db:migrate
   # a deal can have 1 to many burgers
-  add_line_to_file app/models/deal.rb 3 "  has_many :burgers" 
+  add_line_to_file app/models/deal.rb 2 "  has_many :burgers" 
 }
 
 function install_devise {
@@ -123,5 +123,5 @@ setup_routes
 
 rails generate controller Restaurants
 # copy reference controller file
-cp ../controllers/reastaurants_controller.rb app/controllers
+cp ../controllers/restaurants_controller.rb app/controllers
 

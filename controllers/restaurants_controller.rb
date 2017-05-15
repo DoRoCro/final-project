@@ -1,6 +1,6 @@
 class RestaurantsController < ApplicationController
   def index
     restaurants = Restaurant.all
-    render restaurants
+    render json: restaurants
   end
 end

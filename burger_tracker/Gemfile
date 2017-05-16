@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'rack-cors', :require => 'rack/cors'
 # User devise for multi-user authentication
 gem 'devise'
 # pretty-print JSON objects in command line

@@ -6,6 +6,7 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+
 module BurgerTracker
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -21,6 +22,16 @@ module BurgerTracker
     # config.i18n.default_locale = :de
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
+    config.middleware.insert_before 0, "Rack::Cors" do
+     allow do
+       origins 'http://localhost:3000'
+
+       resource '*',
+         headers: :any,
+         methods: [:get, :post, :put, :patch, :delete, :options, :head]
+     end
+    end
     config.active_record.raise_in_transactional_callbacks = true
+
   end
 end

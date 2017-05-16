@@ -75,6 +75,7 @@ function install_devise {
   echo "installing devise based authentication"
   add_line_to_file Gemfile 2 "# User devise for multi-user authentication"
   add_line_to_file Gemfile 3 "gem 'devise'"
+  add_line_to_file Gemfile 2 "gem 'rack-cors', :require => 'rack/cors'"
   bundle
   rails generate devise:install
 }
@@ -183,6 +184,8 @@ function setup_controllers {
   # Add authentication requirement to before action.
   # Some overwriting of scaffold methods to ensure json returned
   # without adding .json to routes from client
+
+  sed -i '' 's/:exception/:null_session/' app/controllers/application_controller.rb
   rails generate scaffold_controller Restaurant --no-jbuilder
   add_line_to_file app/controllers/restaurants_controller.rb 7 "    render json: @restaurants"
   
@@ -208,14 +211,17 @@ function setup_controllers {
   add_line_to_file app/controllers/addresses_controller.rb 14 "    render json: @address"
   sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/addresses_controller.rb 
 
+  # Need a User controller to respond to requests for user info, e.g. to login
+  rails generate controller User
+
   # add session and registration controller for user control with devise
   rails generate controller Sessions
   add_line_to_file app/controllers/sessions_controller.rb 1 "    respond_to :json"
+  sed -i '' 's/ApplicationController/Devise::SessionsController/' app/controllers/sessions_controller.rb
 
   rails generate controller Registrations
   add_line_to_file app/controllers/registrations_controller.rb 1 "    respond_to :json"
-
-
+  sed -i '' 's/ApplicationController/Devise::RegistrationsController/' app/controllers/registrations_controller.rb
 
   # copy reference controller file
   # cp ../controllers/restaurants_controller.rb app/controllers
@@ -259,3 +265,29 @@ add_line_to_file test/controllers/restaurants_controller_test.rb 5 "    sign_in 
 
 
 rake test test/controllers
+
+
+# add cors gem (inserted above as part of Gemfile update installing devise)
+# add cors stuff to config.ru
+cat - <<EOF >> config.ru
+use Rack::Cors do
+
+  allow do
+    origins '*'
+    resource '/public/*', :headers => :any, :methods => :get
+  end
+end
+EOF
+
+# add cors stuff to config/application.rb at line 25
+
+add_line_to_file config/application.rb 25 '  config.middleware.insert_before 0, "Rack::Cors" do'
+add_line_to_file config/application.rb 26 '  allow do'
+add_line_to_file config/application.rb 27 "    origins 'http://localhost:3000'"
+add_line_to_file config/application.rb 28 ''
+add_line_to_file config/application.rb 29 "    resource '*',"
+add_line_to_file config/application.rb 30 '      headers: :any,'
+add_line_to_file config/application.rb 31 '      methods: [:get, :post, :put, :patch, :delete, :options, :head]'
+add_line_to_file config/application.rb 32 '  end'
+add_line_to_file config/application.rb 33 'end'
+

@@ -86,7 +86,7 @@ function install_awesome_print {
   
 }
 
-function setup_users_for_test {
+function setup_fixtures_for_test {
   # Edit(replace) users.yml to ensure tests don't fail with user database update errors
   # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
@@ -102,20 +102,55 @@ cat - <<EOF > test/fixtures/users.yml
   two:
     email: user2@test.com
 EOF
+
+cat - <<EOF > test/fixtures/addresses.yml
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  street_addr: 1
+  street: The Street
+  area: the Area
+  city: The City
+  post_code: EH1 2AB
+  phone_no: 1234 5678
+
+two:
+  street_addr: 2
+  street: The other strees
+  area: Blank
+  city: City
+  post_code: EH2 3CD
+  phone_no: 555 555 5555
+
+EOF
+
+cat - <<EOF > test/fixtures/restaurants.yml
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Milliways
+  address_id: End of Universe
+  franchise: h2g2
+
+two:
+  name: MyString
+  address_id: 
+  franchise: MyString
+EOF
 }
 
 function setup_routes {
   echo "adding routes ..."
   add_line_to_file config/routes.rb 2 ""
-  add_line_to_file config/routes.rb 3 '  scope path: \"api\" do'
-  add_line_to_file config/routes.rb 4 "    resources :restaurants, defaults: {format: :json}"
-  add_line_to_file config/routes.rb 5 "    resources :burgers, defaults: {format: :json}"
-  add_line_to_file config/routes.rb 6 "    resources :deals, defaults: {format: :json}"
-  add_line_to_file config/routes.rb 7 "    resources :addresses, defaults: {format: :json}"
+  add_line_to_file config/routes.rb 3 '  scope path: \"api\", defaults: {format: :json} do'
+  add_line_to_file config/routes.rb 4 "    resources :restaurants"
+  add_line_to_file config/routes.rb 5 "    resources :burgers"
+  add_line_to_file config/routes.rb 6 "    resources :deals"
+  add_line_to_file config/routes.rb 7 "    resources :addresses"
   add_line_to_file config/routes.rb 8 "  end"
   add_line_to_file config/routes.rb 9 ""
-  # add_line_to_file config/routes.rb 7 "  resources :users"
-  add_line_to_file config/routes.rb 10 ""
+  add_line_to_file config/routes.rb 10 "  resources :users"
+  add_line_to_file config/routes.rb 11 ""
 
   delete_line_from_file config/routes.rb 2
   add_line_to_file config/routes.rb 1 ""
@@ -127,8 +162,15 @@ function setup_tests {
   # install and run unit test files from original project
   cp ../specs/models/*.rb test/models
 
+  # add devise test helpers to allow controller tests to run
+  cat - <<EOF >> test/test_helper.rb
+class ActionController::TestCase
+  include Devise::Test::ControllerHelpers
+end
+EOF
+
   # install test users to avoid testing errors due to undefined users with devise
-  setup_users_for_test
+  setup_fixtures_for_test
 
   # get test database in line with dev database before running tests
   rake RAILS_ENV=test db:migrate
@@ -136,6 +178,48 @@ function setup_tests {
   rake RAILS_ENV=test db:seed 
 }
 
+function setup_controllers {
+  # generate and then edit controllers.  
+  # Add authentication requirement to before action.
+  # Some overwriting of scaffold methods to ensure json returned
+  # without adding .json to routes from client
+  rails generate scaffold_controller Restaurant --no-jbuilder
+  add_line_to_file app/controllers/restaurants_controller.rb 7 "    render json: @restaurants"
+  
+  add_line_to_file app/controllers/restaurants_controller.rb 13 "    @restaurant = Restaurant.find(params[:id])"
+  add_line_to_file app/controllers/restaurants_controller.rb 14 "    render json: @restaurant"
+  sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/restaurants_controller.rb 
+
+  rails generate scaffold_controller Burger --no-jbuilder
+  add_line_to_file app/controllers/burgers_controller.rb 7 "    render json: @burgers"
+  add_line_to_file app/controllers/burgers_controller.rb 13 "    @burger = Burger.find(params[:id])"
+  add_line_to_file app/controllers/burgers_controller.rb 14 "    render json: @burger"
+  sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/burgers_controller.rb 
+
+  rails generate scaffold_controller Deal --no-jbuilder
+  add_line_to_file app/controllers/deals_controller.rb 7 "    render json: @deals"
+  add_line_to_file app/controllers/deals_controller.rb 13 "    @deal = Deal.find(params[:id])"
+  add_line_to_file app/controllers/deals_controller.rb 14 "    render json: @deal"
+  sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/deals_controller.rb 
+
+  rails generate scaffold_controller Address --no-jbuilder
+  add_line_to_file app/controllers/addresses_controller.rb 7 "    render json: @address"
+  add_line_to_file app/controllers/addresses_controller.rb 13 "    @address = Address.find(params[:id])"
+  add_line_to_file app/controllers/addresses_controller.rb 14 "    render json: @address"
+  sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/addresses_controller.rb 
+
+  # add session and registration controller for user control with devise
+  rails generate controller Sessions
+  add_line_to_file app/controllers/sessions_controller.rb 1 "    respond_to :json"
+
+  rails generate controller Registrations
+  add_line_to_file app/controllers/registrations_controller.rb 1 "    respond_to :json"
+
+
+
+  # copy reference controller file
+  # cp ../controllers/restaurants_controller.rb app/controllers
+}
 # construction starts here
 
 rails new $PROJECT
@@ -164,26 +248,14 @@ rake test test/models
 # setup routes
 setup_routes
 
-# setup controllers
-rails generate scaffold_controller Restaurant --no-jbuilder
-add_line_to_file app/controllers/restaurants_controller.rb 7 "    render json: @restaurants"
-add_line_to_file app/controllers/restaurants_controller.rb 13 "    @deal = Deal.find(params[:id])"
-add_line_to_file app/controllers/restaurants_controller.rb 14 "    render json: @deal"
+# setup then test controllers
+setup_controllers
 
-rails generate scaffold_controller Burger --no-jbuilder
-add_line_to_file app/controllers/burgers_controller.rb 7 "    render json: @burgers"
-add_line_to_file app/controllers/burgers_controller.rb 13 "    @burger = Burger.find(params[:id])"
-add_line_to_file app/controllers/burgers_controller.rb 14 "    render json: @burger"
+# controller tests need a signed in user to work
+add_line_to_file test/controllers/addresses_controller_test.rb 5   "    sign_in users(:one)"
+add_line_to_file test/controllers/burgers_controller_test.rb 5     "    sign_in users(:one)"
+add_line_to_file test/controllers/deals_controller_test.rb 5       "    sign_in users(:one)"
+add_line_to_file test/controllers/restaurants_controller_test.rb 5 "    sign_in users(:one)"
 
-rails generate scaffold_controller Deal --no-jbuilder
-add_line_to_file app/controllers/deals_controller.rb 7 "    render json: @deals"
-add_line_to_file app/controllers/deals_controller.rb 13 "    @deal = Deal.find(params[:id])"
-add_line_to_file app/controllers/deals_controller.rb 14 "    render json: @deal"
 
-rails generate scaffold_controller Address --no-jbuilder
-add_line_to_file app/controllers/addresses_controller.rb 7 "    render json: @address"
-add_line_to_file app/controllers/addresses_controller.rb 7 "    @address = Address.find(params[:id])"
-add_line_to_file app/controllers/addresses_controller.rb 7 "    render json: @address"
-
-# copy reference controller file
-# cp ../controllers/restaurants_controller.rb app/controllers
+rake test test/controllers

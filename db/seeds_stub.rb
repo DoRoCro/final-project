@@ -14,7 +14,7 @@ user2 = User.create({
   email: 'user2@burgers.com',
   password: 'monkey123'
   })
-
+  
 # Add address
 options1 = {
   'street_addr' => '21',

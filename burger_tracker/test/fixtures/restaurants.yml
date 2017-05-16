@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Milliways
+  address_id: End of Universe
+  franchise: h2g2
+
+two:
+  name: MyString
+  address_id: 
+  franchise: MyString

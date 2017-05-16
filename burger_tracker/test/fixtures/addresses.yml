@@ -1,0 +1,18 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  street_addr: 1
+  street: The Street
+  area: the Area
+  city: The City
+  post_code: EH1 2AB
+  phone_no: 1234 5678
+
+two:
+  street_addr: 2
+  street: The other strees
+  area: Blank
+  city: City
+  post_code: EH2 3CD
+  phone_no: 555 555 5555
+

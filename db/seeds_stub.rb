@@ -1,4 +1,19 @@
 # Edited version from original burger_tracker project
+Deal.delete_all
+Burger.delete_all
+Restaurant.delete_all
+Address.delete_all
+User.delete_all
+
+user1 = User.create({
+  email: 'user1@burgers.com',
+  password: 'helloworld'
+  })
+
+user2 = User.create({
+  email: 'user2@burgers.com',
+  password: 'monkey123'
+  })
 
 # Add address
 options1 = {

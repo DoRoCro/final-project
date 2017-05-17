@@ -63,14 +63,12 @@ restaurant4.save
 options5 = {
   'description' => "Big Kahuna with cheese",
   'price' => 999,
-  'restaurant_id' => restaurant3.id,
-  'rating' => 4
+  'restaurant_id' => restaurant3.id
 }
 options6 = {
   'description' => "Boring Ordinary",
   'price' => 799,
-  'restaurant_id' => restaurant3.id,
-  'rating' => 3
+  'restaurant_id' => restaurant3.id
 }
 
 @burger5 = Burger.new(options5)
@@ -112,7 +110,6 @@ options = {
   'description' => "Bigger Betta Burger",
   'price' => 999,
   'restaurant_id' => restaurant.id,
-  'rating' => 3
 }
 
 burger3 = Burger.new(options)
@@ -122,7 +119,6 @@ options = {
   'description' => "Micro Betta Burger",
   'price' => 499,
   'restaurant_id' => restaurant.id,
-  'rating' => 3
 }
 
 burger4 = Burger.new(options)

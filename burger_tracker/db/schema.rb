@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170516130901) do
+ActiveRecord::Schema.define(version: 20170517135507) do
 
   create_table "addresses", force: :cascade do |t|
     t.string   "street_addr"
@@ -35,7 +35,6 @@ ActiveRecord::Schema.define(version: 20170516130901) do
     t.string   "description"
     t.integer  "restaurant_id"
     t.decimal  "price",         precision: 5, scale: 2
-    t.integer  "rating"
     t.datetime "created_at",                            null: false
     t.datetime "updated_at",                            null: false
   end
@@ -54,6 +53,19 @@ ActiveRecord::Schema.define(version: 20170516130901) do
   end
 
   add_index "deals", ["restaurant_id"], name: "index_deals_on_restaurant_id"
+
+  create_table "ratings", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "ratingable_id"
+    t.string   "ratingable_type"
+    t.integer  "rating"
+    t.text     "comment"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "ratings", ["ratingable_type", "ratingable_id"], name: "index_ratings_on_ratingable_type_and_ratingable_id"
+  add_index "ratings", ["user_id"], name: "index_ratings_on_user_id"
 
   create_table "restaurants", force: :cascade do |t|
     t.string   "name"

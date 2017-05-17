@@ -5,15 +5,21 @@ DIRECTORY=$PROJECT
 # check if project present
 if [ -d "$DIRECTORY" ]; then
   # Control will enter here if $DIRECTORY exists.
+  # try to stop spring pre-loader if it was running from a previous install
+  cd $DIRECTORY
+  spring stop
+  cd ..
   echo "Directory $DIRECTORY found, remove/rename to use this script, exiting..."
   exit
 fi
 
 
-# check if spring pre-loader still running from previous run, interferes with a new rails run
+# check if unstopped spring pre-loader still running from previous run, interferes with a new rails run
 SPRINGS_TO_KILL=`ps | grep spring | grep server | cut -d " " -f 1`
-echo "found spring server pre-loaders $SPRINGS_TO_KILL still running, attempting to stop them..."
-kill $SPRINGS_TO_KILL
+if [[ -z "${SPRINGS_TO_KILL// }" ]]; then
+  echo "found spring server pre-loaders $SPRINGS_TO_KILL still running, attempting to stop them..."
+  kill $SPRINGS_TO_KILL
+fi
 
 function add_line_to_file {
   echo $1 $2 $3
@@ -39,12 +45,16 @@ function define_models {
   rake db:migrate
   rails generate model Restaurant name:string address:references franchise:string
   rake db:migrate
-  rails generate model Burger description:string restaurant:references  price:decimal{5.2} rating:integer
+  rails generate model Burger description:string restaurant:references  price:decimal{5.2}
   rake db:migrate
   rails generate model Deal label:string discount_rate:decimal money_off:decimal start_date:datetime end_date:datetime restaurant:references
   rake db:migrate
 
-  # set up jointable for burgers in a deal
+  # set up a user owned rating with optional comment that can be applied to Burgers, Deals and Restaurants
+  rails generate model Rating user:references ratingable:references\{polymorphic\} rating:integer comment:text
+
+
+  # set up join table for burgers in a deal
   rails generate model BurgerDeal burger_id:integer deal_id:integer
   add_line_to_file app/models/burger_deal.rb 1 "  belongs_to :burger" 
   add_line_to_file app/models/burger_deal.rb 2 "  belongs_to :deal" 
@@ -64,6 +74,15 @@ function define_models {
   add_line_to_file app/models/restaurant.rb 2 "  has_many :deals" 
   # a restaurant belongs to one address, so an address can only have one restaurant
   add_line_to_file app/models/address.rb 1 "  has_one :restaurant" 
+
+  # a user can have 0 to many ratings
+  add_line_to_file app/models/user.rb 5 '  has_many :ratings' 
+  # a burger can have 0 to 1 rating from each user
+  add_line_to_file app/models/burger.rb 3 "  has_many :ratings, as: :ratingable" 
+  # a restaurant can have 0 to 1 rating from each user
+  add_line_to_file app/models/restaurant.rb 3 "  has_many :ratings, as: :ratingable" 
+  # a deal can have 0 to 1 rating from each user
+  add_line_to_file app/models/deal.rb 3 "  has_many :ratings, as: :ratingable" 
 
 
   # run migrations
@@ -212,7 +231,12 @@ function setup_controllers {
   sed -i '' 's/before_action /before_action :authenticate_user!, /' app/controllers/addresses_controller.rb 
 
   # Need a User controller to respond to requests for user info, e.g. to login
-  rails generate controller User
+  rails generate controller users
+  add_line_to_file app/controllers/users_controller.rb 1 "  before_action :authenticate_user!"
+  add_line_to_file app/controllers/users_controller.rb 1 "  def index"
+  add_line_to_file app/controllers/users_controller.rb 1 "    render json: current_user"
+  add_line_to_file app/controllers/users_controller.rb 1 "  end"
+
 
   # add session and registration controller for user control with devise
   rails generate controller Sessions
@@ -281,13 +305,14 @@ EOF
 
 # add cors stuff to config/application.rb at line 25
 
-add_line_to_file config/application.rb 25 '  config.middleware.insert_before 0, "Rack::Cors" do'
-add_line_to_file config/application.rb 26 '  allow do'
-add_line_to_file config/application.rb 27 "    origins 'http://localhost:3000'"
-add_line_to_file config/application.rb 28 ''
-add_line_to_file config/application.rb 29 "    resource '*',"
-add_line_to_file config/application.rb 30 '      headers: :any,'
-add_line_to_file config/application.rb 31 '      methods: [:get, :post, :put, :patch, :delete, :options, :head]'
+string_to_pass_in='    config.middleware.insert_before 0, ''\"''Rack::Cors''\"'' do'
+add_line_to_file config/application.rb 24 "$string_to_pass_in"
+add_line_to_file config/application.rb 25 '    allow do'
+add_line_to_file config/application.rb 26 "      origins 'http://localhost:3000'"
+add_line_to_file config/application.rb 27 ''
+add_line_to_file config/application.rb 28 "      resource '*',"
+add_line_to_file config/application.rb 29 '        headers: :any,'
+add_line_to_file config/application.rb 30 '        methods: [:get, :post, :put, :patch, :delete, :options, :head]'
+add_line_to_file config/application.rb 31 '    end'
 add_line_to_file config/application.rb 32 '  end'
-add_line_to_file config/application.rb 33 'end'
 

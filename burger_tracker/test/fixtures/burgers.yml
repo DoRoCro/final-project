@@ -4,10 +4,8 @@ one:
   description: MyString
   restaurant_id: 
   price: 9.99
-  rating: 1
 
 two:
   description: MyString
   restaurant_id: 
   price: 9.99
-  rating: 1

@@ -4,7 +4,6 @@ class CreateBurgers < ActiveRecord::Migration
       t.string :description
       t.references :restaurant, index: true, foreign_key: true
       t.decimal :price, precision: 5, scale: 2
-      t.integer :rating
 
       t.timestamps null: false
     end

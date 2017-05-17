@@ -2,7 +2,6 @@
 
 require ::File.expand_path('../config/environment', __FILE__)
 run Rails.application
-
 use Rack::Cors do
 
   allow do
@@ -10,4 +9,3 @@ use Rack::Cors do
     resource '/public/*', :headers => :any, :methods => :get
   end
 end
-

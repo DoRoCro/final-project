@@ -37,7 +37,6 @@ class DealTest < ActiveSupport::TestCase
       'description' => "Big Kahuna with cheese",
       'price' => 999,
       'restaurant_id' => @restaurant3.id,
-      'rating' => 3
     }
     @burger1 = Burger.new(options4)
     @burger1.save
@@ -45,7 +44,6 @@ class DealTest < ActiveSupport::TestCase
       'description' => "Boring Ordinary",
       'price' => 799,
       'restaurant_id' => @restaurant3.id,
-      'rating' => 2
     }
     @burger2 = Burger.new(options5)
     @burger2.save

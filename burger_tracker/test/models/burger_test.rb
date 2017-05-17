@@ -38,7 +38,6 @@ class BurgerTest < ActiveSupport::TestCase
       'description' => "Big Kahuna with cheese",
       'price' => 999,
       'restaurant_id' => @restaurant3.id,
-      'rating' => 3
     }
     
     @burger1 = Burger.new(options4)
@@ -48,7 +47,6 @@ class BurgerTest < ActiveSupport::TestCase
     
     assert_equal(999, @burger1.price )
     assert_equal(@restaurant3.id, @burger1.restaurant_id )
-    assert_equal(3, @burger1.rating )
   end
 
   def test_can_do_currency_arithmetic

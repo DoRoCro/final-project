@@ -48,7 +48,7 @@ class ListingDeals extends React.Component {
 
         <div className='shows-container'>
           {
-            this.state.deals.filter((deal) => `${deal.description}`.toUpperCase().indexOf(this.state.searchQuery.toUpperCase()) >= 0)
+            this.state.deals.filter((deal) => `${deal.label}`.toUpperCase().indexOf(this.state.searchQuery.toUpperCase()) >= 0)
              .map((deal) => (
                <Deal {...deal} key={deal.id} />
             ))

@@ -13,6 +13,8 @@ class App extends React.Component {
         <div className='container'>
           <Route exact path='/' component={Home} />
           <Route path='/deals' component={ListingDeals} />
+          {/*   <Route path='/restaurants' component={ListingRestaurants} />
+          <Route path='/burgers' component={ListingBurgers} /> */}
         </div>
       </HashRouter>
     )

@@ -45,7 +45,9 @@ class ListingDeals extends React.Component {
           <Link to='/' className='title'>Burger Tracker</Link>
           <input className='search-box' type='text' placeholder='Search...' value={this.state.searchQuery} onChange={this.doSearch} />
         </nav>
-
+        <div>
+          <h2 className='listing-title'>Available Deals</h2>
+        </div>
         <div className='shows-container'>
           {
             this.state.deals.filter((deal) => `${deal.label}`.toUpperCase().indexOf(this.state.searchQuery.toUpperCase()) >= 0)

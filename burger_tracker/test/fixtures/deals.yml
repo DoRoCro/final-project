@@ -4,14 +4,14 @@ one:
   label: MyString
   discount_rate: 9.99
   money_off: 9.99
-  start_date: 2017-05-17 14:55:03
-  end_date: 2017-05-17 14:55:03
+  start_date: 2017-05-18 10:19:32
+  end_date: 2017-05-18 10:19:32
   restaurant_id: 
 
 two:
   label: MyString
   discount_rate: 9.99
   money_off: 9.99
-  start_date: 2017-05-17 14:55:03
-  end_date: 2017-05-17 14:55:03
+  start_date: 2017-05-18 10:19:32
+  end_date: 2017-05-18 10:19:32
   restaurant_id: 
